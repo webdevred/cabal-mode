@@ -49,7 +49,14 @@
 ;;     fields))
 
 (require 'cl-lib)
-(require 'haskell-utils)
+
+(defvar haskell-mode-interactive-prompt-state nil
+  "Special variable indicating a state of user input waiting.")
+
+(defun haskell-mode-toggle-interactive-prompt-state (&optional disabled)
+  "Set `haskell-mode-interactive-prompt-state' to t.
+If given DISABLED argument sets variable value to nil, otherwise to t."
+  (setq haskell-mode-interactive-prompt-state (not disabled)))
 
 (defcustom haskell-hasktags-path "hasktags"
   "Path to `hasktags' executable."
