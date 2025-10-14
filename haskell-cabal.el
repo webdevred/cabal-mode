@@ -298,7 +298,7 @@ a list is returned instead of failing with a nil result."
      (t nil))))
 
 (defun cabal-find-dir (&optional dir)
-  "Like `cabal-find-file' but returns directory instead.
+  "Like `cabal-find-file' but return directory instead.
 See `cabal-find-file' for meaning of DIR argument."
   (let ((cabal-file (cabal-find-file dir)))
     (when cabal-file
@@ -351,9 +351,9 @@ OTHER-WINDOW use `find-file-other-window'."
     "run"))
 
 (defgroup haskell-cabal nil
-  "Haskell cabal files"
+  "Haskell cabal files."
   :group 'haskell
-)
+  )
 
 (defconst cabal-section-header-regexp "^[[:alnum:]]" )
 (defconst cabal-subsection-header-regexp "^[ \t]*[[:alnum:]]\\w*:")
@@ -387,47 +387,47 @@ Possible results are \\='section-header \\='subsection-header \\='section-data
 
 
 (defun cabal-section-beginning ()
-  "Find the beginning of the current section"
+  "Find the beginning of the current section."
   (save-excursion
     (while (not (or (bobp) (cabal-section-header-p)))
       (forward-line -1))
     (point)))
 
 (defun cabal-beginning-of-section ()
-  "go to the beginning of the section"
+  "Go to the beginning of the section."
   (interactive)
   (goto-char (cabal-section-beginning))
-)
+  )
 
 (defun cabal-section-end ()
-  "Find the end of the current section"
+  "Find the end of the current section."
   (interactive)
   (save-excursion
     (if (re-search-forward "\n\\([ \t]*\n\\)*[[:alnum:]]" nil t)
         (match-beginning 0)
-        (point-max))))
+      (point-max))))
 
 (defun cabal-end-of-section ()
-  "go to the end of the section"
+  "Go to the end of the section."
   (interactive)
   (goto-char (cabal-section-end)))
 
 (defun cabal-next-section ()
-  "Go to the next section"
+  "Go to the next section."
   (interactive)
   (when (cabal-section-header-p) (forward-line))
   (while (not (or (eobp) (cabal-section-header-p)))
     (forward-line)))
 
 (defun cabal-previous-section ()
-  "Go to the next section"
+  "Go to the next section."
   (interactive)
   (when (cabal-section-header-p) (forward-line -1))
   (while (not (or (bobp) (cabal-section-header-p)))
     (forward-line -1)))
 
 (defun cabal-subsection-end ()
-  "find the end of the current subsection"
+  "Find the end of the current subsection."
   (save-excursion
     (cabal-beginning-of-subsection)
     (forward-line)
@@ -442,12 +442,12 @@ Possible results are \\='section-header \\='subsection-header \\='section-data
     (point)))
 
 (defun cabal-end-of-subsection ()
-  "go to the end of the current subsection"
+  "Go to the end of the current subsection."
   (interactive)
   (goto-char (cabal-subsection-end)))
 
 (defun cabal-section ()
-  "Get the name and data of the associated section"
+  "Get the name and data of the associated section."
   (save-excursion
     (cabal-beginning-of-section)
     (when (and (cabal-section-header-p)
@@ -459,7 +459,7 @@ Possible results are \\='section-header \\='subsection-header \\='section-data
 
 
 (defun cabal-subsection ()
-  "Get the name and bounds of of the current subsection"
+  "Get the name and bounds of of the current subsection."
   (save-excursion
     (cabal-beginning-of-subsection)
     (when (looking-at "\\([ \t]*\\(\\w*\\):\\)[ \t]*")
@@ -531,7 +531,7 @@ PROCESS-TYPE determines the format of the returned target."
 
 (defmacro cabal-with-subsection (subsection replace &rest funs)
   "Copy subsection data into a temporary buffer, save indentation
-and execute FORMS
+and execute FORMS.
 
 If REPLACE is non-nil the subsection data is replaced with the
 resulting buffer-content"
@@ -556,7 +556,7 @@ resulting buffer-content"
                    (progn (cabal-save-indentation ,@funs))
                  (goto-char (point-min))
                  (when (looking-at (format "[ ]\\{0,%d\\}" (1+ ,start-col)))
-                     (replace-match ""))
+                   (replace-match ""))
 
                  (setq ,section-data (buffer-substring (point-min) (point-max)))))
            ,@(when replace
@@ -572,7 +572,7 @@ resulting buffer-content"
        (forward-line))))
 
 (defun cabal-chomp-line ()
-  "Remove leading and trailing whitespaces from current line"
+  "Remove leading and trailing whitespaces from current line."
   (beginning-of-line)
   (when (looking-at "^[ \t]*\\([^ \t]\\|\\(?:[^ \t].*[^ \t]\\)\\)[ \t]*$")
     (replace-match (match-string 1) nil t)
@@ -580,7 +580,7 @@ resulting buffer-content"
 
 
 (defun cabal-min-indentation (&optional beg end)
-  "Compute largest common whitespace prefix of each line in between BEG and END"
+  "Compute largest common whitespace prefix of each line in between BEG and END."
   (save-excursion
     (goto-char (or beg (point-min)))
     (let ((min-indent nil))
@@ -600,11 +600,11 @@ resulting buffer-content"
     (looking-at "^[ \t]*\\(?:--.*\\)?$")))
 
 (defun cabal-kill-indentation ()
-  "Remove longest common whitespace prefix from each line"
+  "Remove longest common whitespace prefix from each line."
   (goto-char (point-min))
   (let ((indent (cabal-min-indentation)))
     (cabal-each-line (unless (cabal-ignore-line-p)
-                               (delete-char indent)) )
+                       (delete-char indent)) )
     indent))
 
 (defun cabal-add-indentation (indent)
@@ -630,7 +630,7 @@ resulting buffer-content"
            (goto-char (point-min))
            (let ((,new-l1-indent (current-indentation)))
              (cabal-add-indentation (- ,old-l1-indent
-                                           ,new-l1-indent))))))))
+                                       ,new-l1-indent))))))))
 
 (defun cabal-comma-separatorp (pos)
   "Return non-nil when the char at POS is a comma separator.
@@ -664,7 +664,7 @@ nil: no commas, e.g.
     Foo Bar
 
 If the styles are mixed, the position of the first comma
-determines the style. If there is only one element then `after'
+determines the style.  If there is only one element then `after'
 style is assumed."
   (let (comma-style)
     ;; split list items on single line
@@ -698,7 +698,7 @@ style is assumed."
     comma-style))
 
 (defun cabal-listify (comma-style)
-  "Add commas so that the buffer contains a comma-separated list.
+  "Add commas so that the buffer contain a comma-separated list.
 Respect the COMMA-STYLE, see
 `cabal-strip-list-and-detect-style' for the possible
 styles."
@@ -744,7 +744,7 @@ Respect the comma style."
   nil)
 
 (defmacro cabal-save-position (&rest forms)
-  "Save position as mark, execute FORMs and go back to mark"
+  "Save position as mark, execute FORMS and go back to mark."
   `(prog2
        (cabal-mark)
        (progn ,@forms)
@@ -761,13 +761,13 @@ Respect the comma style."
      (t (string< key1str key2str)))))
 
 (defun cabal-subsection-arrange-lines ()
-  "Sort lines of current subsection"
+  "Sort lines of current subsection."
   (interactive)
   (cabal-save-position
    (let* ((subsection (cabal-section-name (cabal-subsection)))
           (compare-lines (if (string= (downcase subsection) "build-depends")
-                            'cabal-sort-lines-depends-compare
-                          nil)))
+                             'cabal-sort-lines-depends-compare
+                           nil)))
      (cabal-with-subsection
       (cabal-subsection) t
       (cabal-with-cs-list
@@ -778,7 +778,7 @@ Respect the comma style."
                   ))))))
 
 (defun cabal-subsection-beginning ()
-  "find the beginning of the current subsection"
+  "find the beginning of the current subsection."
   (save-excursion
     (while (and (not (bobp))
                 (not (cabal-header-p)))
@@ -787,12 +787,12 @@ Respect the comma style."
     (point)))
 
 (defun cabal-beginning-of-subsection ()
-  "go to the beginning of the current subsection"
+  "go to the beginning of the current subsection."
   (interactive)
   (goto-char (cabal-subsection-beginning)))
 
 (defun cabal-next-subsection ()
-  "go to the next subsection"
+  "go to the next subsection."
   (interactive)
   (if (cabal-header-p) (forward-line))
   (while (and (not (eobp))
@@ -801,7 +801,7 @@ Respect the comma style."
   (cabal-forward-to-line-entry))
 
 (defun cabal-previous-subsection ()
-  "go to the previous subsection"
+  "go to the previous subsection,"
   (interactive)
   (if (cabal-header-p) (forward-line -1))
   (while (and (not (bobp))
@@ -878,8 +878,8 @@ Respect the comma style."
                                        'cabal-marker
                                        'marked))
         (marked-line (text-property-any (point-min) (point-max)
-                                       'cabal-marker
-                                       'marked-line) )
+                                        'cabal-marker
+                                        'marked-line) )
         )
     (cond (marked-pos (goto-char marked-pos))
           (marked-line (goto-char marked-line)))))
@@ -894,8 +894,8 @@ resulting buffer-content.  Unmark line at the end."
      (cabal-mark)
      (unwind-protect
          (cabal-with-subsection (cabal-subsection) ,replace
-          (cabal-goto-mark)
-          ,@forms)
+                                (cabal-goto-mark)
+                                ,@forms)
        (cabal-remove-mark))))
 
 
@@ -912,7 +912,7 @@ resulting buffer-content.  Unmark line at the end."
 
 (defconst cabal-module-sections '("exposed-modules" "other-modules")
   "List of sections that contain module names"
-)
+  )
 
 (defconst cabal-file-sections
   '("main-is" "c-sources" "data-files" "extra-source-files"
@@ -948,7 +948,7 @@ Source names from main-is and c-sources sections are left untouched
 (defun cabal-join-paths (&rest args)
   "Crude hack to replace f-join"
   (mapconcat 'identity args "/")
-)
+  )
 
 (defun cabal-find-or-create-source-file ()
   "Open the source file this line refers to."
@@ -963,8 +963,8 @@ Source names from main-is and c-sources sections are left untouched
              (delq nil (mapcar
                         (lambda (dir)
                           (let ((file (cabal-join-paths base-dir
-                                                                dir
-                                                                filename)))
+                                                        dir
+                                                        filename)))
                             (when (and (file-readable-p file)
                                        (not (file-directory-p file)))
                               file)))
@@ -975,7 +975,7 @@ Source names from main-is and c-sources sections are left untouched
                   (cabal-mode-toggle-interactive-prompt-state)
                   (let* ((src-dir
                           (cabal-join-paths base-dir
-                                                    (or (car src-dirs) "")))
+                                            (or (car src-dirs) "")))
                          (newfile (cabal-join-paths src-dir filename))
                          (do-create-p (y-or-n-p (format "Create file %s ?" newfile))))
                     (when do-create-p
@@ -996,10 +996,10 @@ Source names from main-is and c-sources sections are left untouched
            (downcase (cabal-section-name (cabal-section))))))
       (cabal-next-section))
     (if (eobp)
-      (if wrap (progn
-                 (goto-char (point-min))
-                 (cabal-find-section-type type nil) )
-        nil)
+        (if wrap (progn
+                   (goto-char (point-min))
+                   (cabal-find-section-type type nil) )
+          nil)
       (point))))
 
 (defun cabal-goto-section-type (type)
@@ -1029,7 +1029,7 @@ Source names from main-is and c-sources sections are left untouched
 
 
 (defun cabal-line-entry-column ()
-  "Column at which the line entry starts"
+  "Column at which the line entry start."
   (save-excursion
     (cl-case (cabal-classify-line)
       (section-data (beginning-of-line)
@@ -1063,16 +1063,16 @@ Source names from main-is and c-sources sections are left untouched
   (cabal-forward-to-line-entry))
 
 (defun cabal-map-sections (fun)
-  "Execute fun over each section, collecting the result"
+  "Execute FUN over each section, collecting the result."
   (save-excursion
     (goto-char (point-min))
     (let ((results nil))
-        (while (not (eobp))
-          (let* ((section (cabal-section))
-                 (result (and section (funcall fun (cabal-section)))))
-            (when section (setq results (cons result results))))
-          (cabal-next-section))
-        (nreverse results))))
+      (while (not (eobp))
+        (let* ((section (cabal-section))
+               (result (and section (funcall fun (cabal-section)))))
+          (when section (setq results (cons result results))))
+        (cabal-next-section))
+      (nreverse results))))
 
 (defun cabal-section-add-build-dependency (dependency &optional sort sec)
   "Add a build dependency to the build-depends section"
@@ -1106,8 +1106,8 @@ Pass SILENT argument to update all sections without asking user."
                                        (cabal-section-name section)
                                        (cabal-section-value section))))
                (cabal-section-add-build-dependency dependency
-                                                           sort
-                                                           section))
+                                                   sort
+                                                   section))
              nil)
          (cabal-mode-toggle-interactive-prompt-state t))))))
 
