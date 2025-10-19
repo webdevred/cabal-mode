@@ -1,7 +1,8 @@
-;;; haskell-cabal.el --- Support for Cabal packages -*- lexical-binding: t -*-
+;;; cabal-mode.el --- Support for Cabal packages -*- lexical-binding: t -*-
 
 ;; Copyright © 2007, 2008  Stefan Monnier
 ;;             2016 Arthur Fayzrakhmanov
+;;             2025 August Johansson
 
 ;; Author: Stefan Monnier <monnier@iro.umontreal.ca>
 
@@ -174,7 +175,7 @@ it from list if one of the following conditions are hold:
     map))
 
 ;;;###autoload
-(define-derived-mode cabal-mode text-mode "Haskell-Cabal"
+(define-derived-mode cabal-mode text-mode "Cabal"
   "Major mode for Cabal package description files."
   (setq-local font-lock-defaults
               '(cabal-font-lock-keywords t t nil nil))
@@ -1146,5 +1147,5 @@ buffer not visiting a file returns nil."
       (when buffer-file-name
         (file-name-directory buffer-file-name))))
 
-(provide 'haskell-cabal)
-;;; haskell-cabal.el ends here
+(provide 'cabal-mode)
+;;; cabal-mode.el ends here
