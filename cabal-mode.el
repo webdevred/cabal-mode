@@ -3,9 +3,10 @@
 ;; Copyright © 2007, 2008  Stefan Monnier
 ;;             2016 Arthur Fayzrakhmanov
 ;;             2025 August Johansson
-
+;; URL: https://github.com/webdevred/cabal-mode
+;; Package-Version: 0.0.1
+;; Package-Requires: ((emacs "24.4"))
 ;; Author: Stefan Monnier <monnier@iro.umontreal.ca>
-
 ;; This file is not part of GNU Emacs.
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -25,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Todo:
+;;; Todo:
 
 ;; - distinguish continued lines from indented lines.
 ;; - indent-line-function.
@@ -58,20 +59,6 @@
   "Set `cabal-mode-interactive-prompt-state' to t.
 If given DISABLED argument sets variable value to nil, otherwise to t."
   (setq cabal-mode-interactive-prompt-state (not disabled)))
-
-(defcustom haskell-hasktags-path "hasktags"
-  "Path to `hasktags' executable."
-  :group 'haskell
-  :type 'string)
-
-(defcustom haskell-hasktags-arguments '("-e" "-x")
-  "Additional arguments for `hasktags' executable.
-By default these are:
-
--e - generate ETAGS file
--x - generate additional information in CTAGS file."
-  :group 'haskell
-  :type '(list string))
 
 (defconst cabal-general-fields
   ;; Extracted with (cabal-extract-fields-from-doc "general-fields")
@@ -187,8 +174,7 @@ it from list if one of the following conditions are hold:
   (setq-local comment-end "")
   (setq-local comment-end-skip "[ \t]*\\(\\s>\\|\n\\)")
   (setq-local indent-line-function 'cabal-indent-line)
-  (setq indent-tabs-mode nil)
-  )
+  (setq indent-tabs-mode nil))
 
 (make-obsolete 'cabal-get-setting
                'cabal--get-field
@@ -351,10 +337,9 @@ OTHER-WINDOW use `find-file-other-window'."
     "help"
     "run"))
 
-(defgroup haskell-cabal nil
+(defgroup cabal nil
   "Haskell cabal files."
-  :group 'haskell
-  )
+  :group 'haskell)
 
 (defconst cabal-section-header-regexp "^[[:alnum:]]" )
 (defconst cabal-subsection-header-regexp "^[ \t]*[[:alnum:]]\\w*:")
@@ -397,8 +382,7 @@ Possible results are \\='section-header \\='subsection-header \\='section-data
 (defun cabal-beginning-of-section ()
   "Go to the beginning of the section."
   (interactive)
-  (goto-char (cabal-section-beginning))
-  )
+  (goto-char (cabal-section-beginning)))
 
 (defun cabal-section-end ()
   "Find the end of the current section."
@@ -471,23 +455,32 @@ Possible results are \\='section-header \\='subsection-header \\='section-data
                                                (current-column))
             :data-indent-column (save-excursion (goto-char (match-end 0))
                                                 (when (looking-at "\n  +\\(\\w*\\)") (goto-char (match-beginning 1)))
-                                                (current-column)
-                                                )))))
+                                                (current-column))))))
 
 
 (defun cabal-section-name (section)
+  "Return the name of SECTION.
+Fetches the value associated with the :name key from the SECTION plist."
   (plist-get section :name))
 
 (defun cabal-section-value (section)
+  "Return the value of SECTION.
+Fetches the value associated with the :value key from the SECTION plist."
   (plist-get section :value))
 
 (defun cabal-section-start (section)
+  "Return the buffer position where SECTION begins.
+Fetches the value associated with the :beginning key from the SECTION plist."
   (plist-get section :beginning))
 
 (defun cabal-section-data-start-column (section)
+  "Return the column where the data part of SECTION start.
+Fetches the value associated with the :data-start-column key from the SECTION plist."
   (plist-get section :data-start-column))
 
 (defun cabal-section-data-indent-column (section)
+  "Return the indentation column used for data in SECTION.
+Fetches the value associated with the :data-indent-column key from the SECTION plist."
   (plist-get section :data-indent-column))
 
 (defun cabal-map-component-type (component-type)
@@ -531,11 +524,10 @@ PROCESS-TYPE determines the format of the returned target."
           (reverse matches))))))
 
 (defmacro cabal-with-subsection (subsection replace &rest funs)
-  "Copy subsection data into a temporary buffer, save indentation
-and execute FORMS.
+  "Copy SUBSECTION data into a temporary buffer, save indentation and execute FUNS.
 
 If REPLACE is non-nil the subsection data is replaced with the
-resulting buffer-content"
+resulting buffer-content."
   (let ((section (make-symbol "section"))
         (beg (make-symbol "beg"))
         (end (make-symbol "end"))
@@ -565,11 +557,11 @@ resulting buffer-content"
                  (goto-char ,beg)
                  (insert ,section-data))))))))
 
-(defmacro cabal-each-line (&rest fun)
-  "Execute FORMS on each line"
+(defmacro cabal-each-line (&rest forms)
+  "Execute FORMS on each line."
   `(save-excursion
      (while (< (point) (point-max))
-       ,@fun
+       ,@forms
        (forward-line))))
 
 (defun cabal-chomp-line ()
@@ -616,8 +608,8 @@ resulting buffer-content"
 
 
 (defmacro cabal-save-indentation (&rest funs)
-  "Strip indentation from each line, execute FORMS and reinstate indentation
-   so that the indentation of the FIRST LINE matches"
+  "Strip indentation from each line, execute FUNS and reinstate indentation
+   so that the indentation of the FIRST LINE matches."
   (let ((old-l1-indent (make-symbol "new-l1-indent"))
         (new-l1-indent (make-symbol "old-l1-indent")))
     `(let ( (,old-l1-indent (save-excursion
@@ -753,6 +745,12 @@ Respect the comma style."
      (cabal-remove-mark)))
 
 (defun cabal-sort-lines-depends-compare (key1 key2)
+    "Compare two dependency keys, KEY1 and KEY2, for sorting.
+Return t if KEY1 should come before KEY2.
+
+Each key is a cons cell (START . END) representing a region in the buffer.
+The function extracts the corresponding text strings and sorts them
+lexicographically, but ensures that the package \"base\" always comes first."
   (let* ((key1str (buffer-substring (car key1) (cdr key1)))
          (key2str (buffer-substring (car key2) (cdr key2)))
          (base-regex "^[ \t]*base\\($\\|[^[:alnum:]-]\\)"))
@@ -775,11 +773,10 @@ Respect the comma style."
        (sort-subr nil 'forward-line 'end-of-line
                   'cabal-sort-lines-key-fun
                   'end-of-line
-                  compare-lines
-                  ))))))
+                  compare-lines))))))
 
 (defun cabal-subsection-beginning ()
-  "find the beginning of the current subsection."
+  "Find the beginning of the current subsection."
   (save-excursion
     (while (and (not (bobp))
                 (not (cabal-header-p)))
@@ -788,12 +785,12 @@ Respect the comma style."
     (point)))
 
 (defun cabal-beginning-of-subsection ()
-  "go to the beginning of the current subsection."
+  "Go to the beginning of the current subsection."
   (interactive)
   (goto-char (cabal-subsection-beginning)))
 
 (defun cabal-next-subsection ()
-  "go to the next subsection."
+  "Go to the next subsection."
   (interactive)
   (if (cabal-header-p) (forward-line))
   (while (and (not (eobp))
@@ -802,18 +799,17 @@ Respect the comma style."
   (cabal-forward-to-line-entry))
 
 (defun cabal-previous-subsection ()
-  "go to the previous subsection,"
+  "Go to the previous subsection."
   (interactive)
   (if (cabal-header-p) (forward-line -1))
   (while (and (not (bobp))
               (not (cabal-header-p)))
     (forward-line -1))
-  (cabal-forward-to-line-entry)
-  )
+  (cabal-forward-to-line-entry))
 
 
 (defun cabal-find-subsection-by (section pred)
-  "Find subsection with name NAME"
+  "Find SECTION where PRED is t."
   (save-excursion
     (when section (goto-char (cabal-section-start section)))
     (let* ((end (if section (cabal-section-end) (point-max)))
@@ -827,7 +823,7 @@ Respect the comma style."
       found)))
 
 (defun cabal-find-subsection (section name)
-  "Find subsection with name NAME"
+  "Find SECTION with name NAME."
   (let ((downcase-name (downcase name)))
     (cabal-find-subsection-by
      section
@@ -845,7 +841,7 @@ Respect the comma style."
   (cabal-goto-subsection "exposed-modules"))
 
 (defun cabal-subsection-entry-list (section name)
-  "Get the data of a subsection as a list"
+  "Get the data of a SECTION named NAME as a list."
   (let ((subsection (cabal-find-subsection section name)))
     (when subsection
       (cabal-with-subsection
@@ -865,7 +861,7 @@ Respect the comma style."
 
 
 (defun cabal-mark ()
-  "Mark the current position with the text property cabal-marker"
+  "Mark the current position with the text property cabal-marker."
   (cabal-remove-mark)
   (put-text-property (line-beginning-position) (line-end-position)
                      'cabal-marker 'marked-line)
@@ -874,14 +870,13 @@ Respect the comma style."
 
 
 (defun cabal-goto-mark ()
-  "Go to marked line"
+  "Go to marked line."
   (let ((marked-pos (text-property-any (point-min) (point-max)
                                        'cabal-marker
                                        'marked))
         (marked-line (text-property-any (point-min) (point-max)
                                         'cabal-marker
-                                        'marked-line) )
-        )
+                                        'marked-line) ))
     (cond (marked-pos (goto-char marked-pos))
           (marked-line (goto-char marked-line)))))
 
@@ -912,19 +907,18 @@ resulting buffer-content.  Unmark line at the end."
   (concat (replace-regexp-in-string "[.]" "/" module ) ".hs"))
 
 (defconst cabal-module-sections '("exposed-modules" "other-modules")
-  "List of sections that contain module names"
-  )
+  "List of sections that contain module names.")
 
 (defconst cabal-file-sections
   '("main-is" "c-sources" "data-files" "extra-source-files"
     "extra-doc-files" "extra-tmp-files" )
-  "List of subsections that contain filenames"
-  )
+  "List of subsections that contain filenames.")
 
 (defconst cabal-source-bearing-sections
   '("library" "executable" "test-suite" "benchmark"))
 
 (defun cabal-source-section-p (section)
+  "Wheter given SECTION is a source section, so not a common section."
   (not (not (member (downcase (cabal-section-name section))
                     cabal-source-bearing-sections))))
 
@@ -936,9 +930,7 @@ dot (.) in the module name with a forward slash (/) and appending \".hs\"
 
 Example: Foo.Bar.Quux ==> Foo/Bar/Quux.hs
 
-Source names from main-is and c-sources sections are left untouched
-
-"
+Source names from main-is and c-sources sections are left untouched."
   (let ((entry (cabal-get-line-content))
         (subsection (downcase (cabal-section-name
                                (cabal-subsection)))))
@@ -947,9 +939,8 @@ Source names from main-is and c-sources sections are left untouched
           ((member subsection cabal-file-sections) entry))))
 
 (defun cabal-join-paths (&rest args)
-  "Crude hack to replace f-join"
-  (mapconcat 'identity args "/")
-  )
+  "Crude hack to replace f-join."
+  (mapconcat 'identity args "/"))
 
 (defun cabal-find-or-create-source-file ()
   "Open the source file this line refers to."
@@ -986,6 +977,9 @@ Source names from main-is and c-sources sections are left untouched
 
 
 (defun cabal-find-section-type (type &optional wrap)
+  "Find a section section-type TYPE.
+
+Restart WRAP is t."
   (save-excursion
     (cabal-next-section)
     (while
@@ -1041,14 +1035,14 @@ Source names from main-is and c-sources sections are left untouched
        (cabal-section-data-start-column (cabal-subsection))))))
 
 (defun cabal-forward-to-line-entry ()
-  "go forward to the beginning of the line entry (but never move backwards)"
+  "Go forward to the beginning of the line entry (but never move backwards)."
   (let ((col (cabal-line-entry-column)))
     (when (and col (< (current-column) col))
       (beginning-of-line)
       (forward-char col))))
 
 (defun cabal-indent-line ()
-  "Indent current line according to subsection"
+  "Indent current line according to subsection."
   (interactive)
   (cl-case (cabal-classify-line)
     (section-data
@@ -1076,7 +1070,7 @@ Source names from main-is and c-sources sections are left untouched
       (nreverse results))))
 
 (defun cabal-section-add-build-dependency (dependency &optional sort sec)
-  "Add a build dependency to the build-depends section"
+  "Add a build DEPENDENCY to the build-depends section."
   (let* ((section (or sec (cabal-section)))
          (subsection (and section
                           (cabal-find-subsection section "build-depends"))))
