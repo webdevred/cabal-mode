@@ -25,6 +25,7 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
+;; Mode for Cabal, the project confiuration format for Haskell.
 
 ;;; Todo:
 
