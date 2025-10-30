@@ -168,19 +168,19 @@ it from list if one of the following conditions are hold:
   (setq-local font-lock-defaults
               '(cabal-font-lock-keywords t t nil nil))
   (add-to-list 'cabal-buffers (current-buffer))
-  (add-hook 'change-major-mode-hook 'cabal-unregister-buffer nil 'local)
-  (add-hook 'kill-buffer-hook 'cabal-unregister-buffer nil 'local)
+  (add-hook 'change-major-mode-hook #'cabal-unregister-buffer nil 'local)
+  (add-hook 'kill-buffer-hook #'cabal-unregister-buffer nil 'local)
   (setq-local comment-start "--")
   (setq-local comment-start-skip "--[ \t]*")
   (setq-local comment-end "")
   (setq-local comment-end-skip "[ \t]*\\(\\s>\\|\n\\)")
-  (setq-local indent-line-function 'cabal-indent-line)
+  (setq-local indent-line-function #'cabal-indent-line)
   (setq indent-tabs-mode nil))
 
 (make-obsolete 'cabal-get-setting
                'cabal--get-field
                "March 14, 2016")
-(defalias 'cabal-get-setting 'cabal--get-field
+(defalias 'cabal-get-setting #'cabal--get-field
   "Try to read value of field with NAME from current buffer.
 Obsolete function.  Defined for backward compatibility.  Use
 `cabal--get-field' instead.")
@@ -213,7 +213,7 @@ Obsolete function.  Defined for backward compatibility.  Use
 (make-obsolete 'cabal-guess-setting
                'cabal-get-field
                "March 14, 2016")
-(defalias 'cabal-guess-setting 'cabal-get-field
+(defalias 'cabal-guess-setting #'cabal-get-field
   "Read the value of field with NAME from project's cabal file.
 Obsolete function.  Defined for backward compatibility.  Use
 `cabal-get-field' instead.")
@@ -561,7 +561,7 @@ resulting buffer-content."
 (defmacro cabal-each-line (&rest forms)
   "Execute FORMS on each line."
   `(save-excursion
-     (while (< (point) (point-max))
+     (while (eobp)
        ,@forms
        (forward-line))))
 
@@ -920,8 +920,8 @@ resulting buffer-content.  Unmark line at the end."
 
 (defun cabal-source-section-p (section)
   "Wheter given SECTION is a source section, so not a common section."
-  (not (not (member (downcase (cabal-section-name section))
-                    cabal-source-bearing-sections))))
+  (member (downcase (cabal-section-name section))
+                    cabal-source-bearing-sections))
 
 (defun cabal-line-filename ()
   "Expand filename in current line according to the subsection type.
@@ -941,7 +941,7 @@ Source names from main-is and c-sources sections are left untouched."
 
 (defun cabal-join-paths (&rest args)
   "Crude hack to replace f-join."
-  (mapconcat 'identity args "/"))
+  (mapconcat #'identity args "/"))
 
 (defun cabal-find-or-create-source-file ()
   "Open the source file this line refers to."
