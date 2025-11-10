@@ -471,17 +471,20 @@ Fetches the value associated with the :value key from the SECTION plist."
 
 (defun cabal-section-start (section)
   "Return the buffer position where SECTION begins.
-Fetches the value associated with the :beginning key from the SECTION plist."
+Fetches the value associated with the :beginning key from the SECTION
+plist."
   (plist-get section :beginning))
 
 (defun cabal-section-data-start-column (section)
   "Return the column where the data part of SECTION start.
-Fetches the value associated with the :data-start-column key from the SECTION plist."
+Fetches the value associated with the :data-start-column key from the
+SECTION plist."
   (plist-get section :data-start-column))
 
 (defun cabal-section-data-indent-column (section)
   "Return the indentation column used for data in SECTION.
-Fetches the value associated with the :data-indent-column key from the SECTION plist."
+Fetches the value associated with the :data-indent-column key from the
+SECTION plist."
   (plist-get section :data-indent-column))
 
 (defun cabal-map-component-type (component-type)
@@ -609,7 +612,9 @@ resulting buffer-content."
 
 
 (defmacro cabal-save-indentation (&rest funs)
-  "Strip indentation from each line, execute FUNS and reinstate indentation so that the indentation of the FIRST LINE matches."
+  "Strip indenation, apply FUNS and reinstate indenation.
+Strip indentation from each line, execute FUNS and reinstate indentation
+so that the indentation of the FIRST LINE matches."
   (let ((old-l1-indent (make-symbol "new-l1-indent"))
         (new-l1-indent (make-symbol "old-l1-indent")))
     `(let ( (,old-l1-indent (save-excursion
