@@ -609,8 +609,7 @@ resulting buffer-content."
 
 
 (defmacro cabal-save-indentation (&rest funs)
-  "Strip indentation from each line, execute FUNS and reinstate indentation
-   so that the indentation of the FIRST LINE matches."
+  "Strip indentation from each line, execute FUNS and reinstate indentation so that the indentation of the FIRST LINE matches."
   (let ((old-l1-indent (make-symbol "new-l1-indent"))
         (new-l1-indent (make-symbol "old-l1-indent")))
     `(let ( (,old-l1-indent (save-excursion
@@ -722,8 +721,10 @@ styles."
          (just-one-space))))))
 
 (defmacro cabal-with-cs-list (&rest funs)
-  "Format the buffer so that each line contains a list element.
-Respect the comma style."
+  "Run FUNS with the current Cabal list temporarily reformatted.
+Each list element is placed on its own line while FUNS run.  The
+original comma style (trailing or leading) is detected and restored
+afterwards."
   (let ((comma-style (make-symbol "comma-style")))
     `(let ((,comma-style
             (save-excursion
@@ -882,7 +883,8 @@ lexicographically, but ensures that the package \"base\" always comes first."
           (marked-line (goto-char marked-line)))))
 
 (defmacro cabal-with-subsection-line (replace &rest forms)
-  "Mark line, copy subsection data into a temporary buffer, save indentation
+  "Apply FORMS on subsection at point.
+Mark line, copy subsection data into a temporary buffer, save indentation
 and execute FORMS at the marked line.
 
 If REPLACE is non-nil the subsection data is replaced with the
@@ -1071,7 +1073,9 @@ Restart WRAP is t."
       (nreverse results))))
 
 (defun cabal-section-add-build-dependency (dependency &optional sort sec)
-  "Add a build DEPENDENCY to the build-depends section."
+  "Add a build DEPENDENCY to the build-depends key.
+If SORT argument is given sort dependencies in section after update.
+Adds said dependency to section SEC."
   (let* ((section (or sec (cabal-section)))
          (subsection (and section
                           (cabal-find-subsection section "build-depends"))))
